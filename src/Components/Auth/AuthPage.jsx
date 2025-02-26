@@ -11,7 +11,6 @@ import useAuthStore from "../../store/authStore";
 const AuthPage = ({ type, role }) => {
   const navigate = useNavigate();
   console.log(type);
-  // const isSignUp = type === "signup";
   const isParent = role === "parent";
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,33 +22,33 @@ const AuthPage = ({ type, role }) => {
   };
 
   const handleAuth = async () => {
-  setLoading(true);
-  try {
-    const res = await axiosInstance.post(`/auth/login`, {
-      ...formData,
-      role,
-    });
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post(`/auth/login`, {
+        ...formData,
+        role,
+      });
 
-    // Use the role prop instead of response data
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", role);  // Use the role prop
-    localStorage.setItem("name", formData.email); // Or use another appropriate value for name
+      // Store the token and parent name in localStorage
+      localStorage.setItem("auth_token", res.data.token);
+      localStorage.setItem("role", role);
+      localStorage.setItem("parent_name", res.data.name || formData.email); // Store parent's name
 
-    // Update Zustand store with the role prop
-    setAuth(res.data.token, role, formData.email);
+      // Update Zustand store
+      setAuth(res.data.token, role, res.data.name || formData.email);
 
-    toast.success("Logged in successfully!");
+      toast.success("Logged in successfully!");
 
-    // Navigate using the role prop
-    const dashboardPath = `/${role}/dashboard`;
-    navigate(dashboardPath);
+      // Navigate based on role
+      const dashboardPath = `/${role}/dashboard`;
+      navigate(dashboardPath);
 
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-700">
