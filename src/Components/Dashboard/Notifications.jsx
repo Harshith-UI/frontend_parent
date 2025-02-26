@@ -19,14 +19,7 @@ const ParentDashboard = () => {
       try {
         const response = await axiosInstance.get("/notifications");
         const unread = response.data.filter((n) => !n.isRead).length;
-
-        // ✅ Check if notifications were cleared
-        const storedCleared = localStorage.getItem("notificationsCleared");
-        if (storedCleared === "true") {
-          setUnreadCount(0); // ✅ Show 0 if notifications were cleared before
-        } else {
-          setUnreadCount(unread);
-        }
+        setUnreadCount(unread);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
@@ -75,7 +68,6 @@ const ParentDashboard = () => {
               onClick={() => {
                 setActiveSection("notifications");
                 setUnreadCount(0); // ✅ Reset unread count when opening notifications
-                localStorage.setItem("notificationsCleared", "true"); // ✅ Save cleared state
               }}
             >
               Notifications
