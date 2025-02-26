@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
- // ✅ Import the existing axios instance
-import axiosInstance from "../Axios/AxiosInstance";
-
+import axiosInstance from "../Axios/AxiosInstance"; // ✅ Using Axios instance for API calls
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -9,7 +7,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axiosInstance.get("/notifications"); // ✅ Uses axiosInstance (no need for full URL)
+        const response = await axiosInstance.get("/notifications");
         setNotifications(response.data);
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -19,9 +17,29 @@ const Notifications = () => {
     fetchNotifications();
   }, []);
 
+  // ✅ Function to Clear All Notifications (Deletes from Database)
+  const handleClearAll = async () => {
+    try {
+      await axiosInstance.delete("/notifications/clear");
+      setNotifications([]); // ✅ Clear UI immediately
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Notifications</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Notifications</h2>
+        {notifications.length > 0 && (
+          <button
+            onClick={handleClearAll}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          >
+            Clear All
+          </button>
+        )}
+      </div>
       {notifications.length === 0 ? (
         <p>No new notifications</p>
       ) : (
