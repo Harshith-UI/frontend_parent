@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../../axiosInstance"; // ✅ Import the existing axios instance
+import axiosInstance from "../Axios/AxiosInstance";
+ // ✅ Import the existing axios instance
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
