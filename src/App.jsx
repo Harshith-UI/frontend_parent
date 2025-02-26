@@ -10,19 +10,9 @@ import { Toaster } from "react-hot-toast";
 
 function App() {
   useEffect(() => {
-    // Retrieve token & parent name from localStorage
-    const authToken = localStorage.getItem("auth_token") || "";
-    const parentName = localStorage.getItem("parent_name") || "Parent";
-
-    // Inject Chatling chatbot with parentToken
+    // Add Chatling.ai chatbot script dynamically
     const configScript = document.createElement("script");
-    configScript.innerHTML = `
-      window.chtlConfig = { 
-        chatbotId: "7775277815",
-        parentToken: "${authToken}",
-        parentName: "${parentName}"
-      }
-    `;
+    configScript.innerHTML = 'window.chtlConfig = { chatbotId: "7775277815" }';
     document.head.appendChild(configScript);
 
     const chatlingScript = document.createElement("script");
