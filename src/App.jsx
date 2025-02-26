@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import RoleSelection from "./pages/RoleSelection";
 import ParentSignin from "./pages/ParentSignIn";
@@ -7,20 +6,40 @@ import ProtectedRoute from "./Components/Auth/ProtectedRoute";
 import ParentDashboard from "./Components/Dashboard/ParentDashboard";
 import TeacherDashboard from "./Components/Dashboard/TeacherDashboard";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 
 function App() {
   useEffect(() => {
-    // Add Chatling.ai chatbot script dynamically
-    const configScript = document.createElement("script");
-    configScript.innerHTML = 'window.chtlConfig = { chatbotId: "7775277815" }';
-    document.head.appendChild(configScript);
-
-    const chatlingScript = document.createElement("script");
-    chatlingScript.src = "https://chatling.ai/js/embed.js";
-    chatlingScript.async = true;
-    chatlingScript.dataset.id = "7775277815";
-    chatlingScript.id = "chatling-embed-script";
-    document.body.appendChild(chatlingScript);
+    (function(){
+      if(!window.chatbase || typeof window.chatbase !== "function" || window.chatbase("getState") !== "initialized") {
+        window.chatbase = function(...args) {
+          if(!window.chatbase.q) {
+            window.chatbase.q = [];
+          }
+          window.chatbase.q.push(args);
+        };
+        window.chatbase = new Proxy(window.chatbase, {
+          get(target, prop) {
+            if (prop === "q") {
+              return target.q;
+            }
+            return (...args) => target(prop, ...args);
+          }
+        });
+      }
+      const onLoad = function() {
+        const script = document.createElement("script");
+        script.src = "https://www.chatbase.co/embed.min.js";
+        script.id = "knB3BcxsciKiLxxBi_aHZ";
+        script.domain = "www.chatbase.co";
+        document.body.appendChild(script);
+      };
+      if (document.readyState === "complete") {
+        onLoad();
+      } else {
+        window.addEventListener("load", onLoad);
+      }
+    })();
   }, []);
 
   return (
