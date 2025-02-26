@@ -1,64 +1,125 @@
-import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuthStore from "../../store/authStore";
+import { Bell, LogOut, Calendar, LineChart } from "lucide-react";
+import { useState, useEffect } from "react";
 import axiosInstance from "../Axios/AxiosInstance"; // ✅ Using Axios instance for API calls
+import ChildAttendance from "./ChildAttendance";
+import ChildProgress from "./ChildProgress";
+import ParentCommunication from "./ParentCommunication";
+import Notifications from "./Notifications";
 
-const Notifications = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [cleared, setCleared] = useState(false);
+const ParentDashboard = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchUnreadNotifications = async () => {
       try {
         const response = await axiosInstance.get("/notifications");
-        const storedCleared = localStorage.getItem("notificationsCleared");
+        const unread = response.data.filter((n) => !n.isRead).length;
 
-        // ✅ If cleared before, don't show notifications
+        // ✅ Check if notifications were cleared
+        const storedCleared = localStorage.getItem("notificationsCleared");
         if (storedCleared === "true") {
-          setCleared(true);
+          setUnreadCount(0); // ✅ Show 0 if notifications were cleared before
         } else {
-          setNotifications(response.data);
+          setUnreadCount(unread);
         }
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
     };
 
-    fetchNotifications();
+    fetchUnreadNotifications();
   }, []);
 
-  // ✅ Function to "Clear" notifications (frontend only)
-  const handleClearAll = () => {
-    setNotifications([]); // Hide notifications in UI
-    setCleared(true); // Mark as cleared
-    localStorage.setItem("notificationsCleared", "true"); // Store cleared state
+  const handleLogout = () => {
+    logout();
+    navigate("/signin");
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Notifications</h2>
-        {notifications.length > 0 && !cleared && (
-          <button
-            onClick={handleClearAll}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-          >
-            Clear All
-          </button>
-        )}
+    <div className="flex h-screen bg-gray-100">
+      <div className="w-64 bg-white shadow-lg p-5 flex flex-col h-full justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold mb-6">Parent Dashboard</h2>
+          <nav>
+            <button
+              className={`w-full py-2 px-4 mb-2 text-left rounded-lg ${activeSection === "dashboard" ? "bg-purple-500 text-white" : "text-gray-700"}`}
+              onClick={() => setActiveSection("dashboard")}
+            >
+              Dashboard
+            </button>
+            <button
+              className={`w-full py-2 px-4 mb-2 text-left rounded-lg ${activeSection === "attendance" ? "bg-purple-500 text-white" : "text-gray-700"}`}
+              onClick={() => setActiveSection("attendance")}
+            >
+              Attendance
+            </button>
+            <button
+              className={`w-full py-2 px-4 mb-2 text-left rounded-lg ${activeSection === "progress" ? "bg-purple-500 text-white" : "text-gray-700"}`}
+              onClick={() => setActiveSection("progress")}
+            >
+              Progress Reports
+            </button>
+            <button
+              className={`w-full py-2 px-4 mb-2 text-left rounded-lg ${activeSection === "communication" ? "bg-purple-500 text-white" : "text-gray-700"}`}
+              onClick={() => setActiveSection("communication")}
+            >
+              Communication
+            </button>
+            <button
+              className={`w-full py-2 px-4 mb-2 text-left rounded-lg ${activeSection === "notifications" ? "bg-purple-500 text-white" : "text-gray-700"}`}
+              onClick={() => {
+                setActiveSection("notifications");
+                setUnreadCount(0); // ✅ Reset unread count when opening notifications
+                localStorage.setItem("notificationsCleared", "true"); // ✅ Save cleared state
+              }}
+            >
+              Notifications
+            </button>
+          </nav>
+        </div>
+        <button onClick={handleLogout} className="w-full py-2 px-4 mt-auto text-left bg-red-500 text-white rounded-lg">
+          Logout
+        </button>
       </div>
-      {cleared || notifications.length === 0 ? (
-        <p>No new notifications</p>
-      ) : (
-        <ul>
-          {notifications.map((note) => (
-            <li key={note._id} className={`mb-4 p-3 rounded-lg ${!note.isRead ? "bg-blue-100" : "bg-gray-100"}`}>
-              <p className="text-gray-500 text-sm">{new Date(note.createdAt).toLocaleDateString()}</p>
-              <p className="font-medium">{note.message}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="flex-1 p-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Welcome, Parent!</h2>
+          {/* ✅ Bell Icon with Unread Notification Badge */}
+          <div className="relative cursor-pointer" onClick={() => setActiveSection("notifications")}>
+            <Bell className="h-6 w-6 text-gray-700" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="mt-6">
+          {activeSection === "dashboard" && (
+            <div className="flex gap-6">
+              <div className="p-4 bg-white shadow rounded-lg">
+                <h3 className="text-gray-600">Attendance</h3>
+                <p className="text-2xl font-semibold">95%</p>
+              </div>
+              <div className="p-4 bg-white shadow rounded-lg">
+                <h3 className="text-gray-600">Progress</h3>
+                <p className="text-2xl font-semibold">A-</p>
+              </div>
+            </div>
+          )}
+          {activeSection === "attendance" && <ChildAttendance />}
+          {activeSection === "progress" && <ChildProgress />}
+          {activeSection === "communication" && <ParentCommunication />}
+          {activeSection === "notifications" && <Notifications />}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Notifications;
+export default ParentDashboard;
