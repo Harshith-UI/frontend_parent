@@ -25,7 +25,7 @@ const AuthPage = ({ type, role }) => {
   const handleAuth = async () => {
   setLoading(true);
   try {
-    const res = await axiosInstance.post(/auth/login, {
+    const res = await axiosInstance.post(`/auth/login`, {
       ...formData,
       role,
     });
@@ -41,7 +41,7 @@ const AuthPage = ({ type, role }) => {
     toast.success("Logged in successfully!");
 
     // Navigate using the role prop
-    const dashboardPath = /${role}/dashboard;
+    const dashboardPath = `/${role}/dashboard`;
     navigate(dashboardPath);
 
   } catch (error) {
