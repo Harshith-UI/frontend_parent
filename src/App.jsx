@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
 import RoleSelection from "./pages/RoleSelection";
 import ParentSignin from "./pages/ParentSignIn";
 import TeacherSignin from "./pages/TeacherSignIn";
@@ -7,46 +6,8 @@ import ProtectedRoute from "./Components/Auth/ProtectedRoute";
 import ParentDashboard from "./Components/Dashboard/ParentDashboard";
 import TeacherDashboard from "./Components/Dashboard/TeacherDashboard";
 import { Toaster } from "react-hot-toast";
-import useAuthStore from "./store/authStore";
 
 function App() {
-  const { token, role } = useAuthStore((state) => ({
-    token: state.token,
-    role: state.role
-  }));
-
-  useEffect(() => {
-    // Initialize Chatbase widget
-    (function(){
-      if(!window.chatbase||window.chatbase("getState")!=="initialized"){
-        window.chatbase=(...arguments)=>{
-          if(!window.chatbase.q){window.chatbase.q=[]}
-          window.chatbase.q.push(arguments)
-        };
-        window.chatbase=new Proxy(window.chatbase,{
-          get(target,prop){
-            if(prop==="q"){return target.q}
-            return(...args)=>target(prop,...args)
-          }
-        })
-      }
-      
-      const onLoad=function(){
-        const script=document.createElement("script");
-        script.src="https://www.chatbase.co/embed.min.js";
-        script.id="knB3BcxsciKiLxxBi_aHZ";
-        script.domain="www.chatbase.co";
-        document.body.appendChild(script)
-      };
-      
-      if(document.readyState==="complete"){
-        onLoad()
-      } else {
-        window.addEventListener("load",onLoad)
-      }
-    })();
-  }, []);
-
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
